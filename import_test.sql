@@ -1,77 +1,104 @@
 -- Creation of a test base...
 
-CREATE DATABASE bank;
-USE bank;
+CREATE DATABASE planets;
+USE planets;
 
-CREATE TABLE `physical` (
+CREATE TABLE `Sector` (
 	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
-	`id_bor` INT,
-	`surname` VARCHAR(255),
-	`patronymic` VARCHAR(255),
-	`passport` VARCHAR(255),
-	`inn` VARCHAR(11),
-	`snils` VARCHAR(11),
-	`driverslic` VARCHAR(255),
-	`other` VARCHAR(255),
-	`notice` VARCHAR(255),
-	`name` VARCHAR(255),
-	PRIMARY KEY(`id`)
-);
-
-INSERT INTO physical (id, name, surname, patronymic, passport, inn, snils, driverslic) VALUES
-(1, 'Ivan', 'Baranov', 'Mihailovich', '1235123', '30947839174', '31947839174', '849271'),
-(2, 'Petr', 'Fedorov', 'Dmitryevich', '4655123', '21947839174', '13947839174', '879271'),
-(3, 'Dmitry', 'Novikov', 'Leonidovich', '9025123', '90947839174', '21947839174', '129271'),
-(4, 'Dave', 'Comunov', 'Stanislavovich', '9745123', '13947839174', '21947839174', '549271'),
-(5, 'Nikita', 'Safronov', 'Ivanovich', '0235123' , '31947839174', '30947839174', '769271');
-
-
-CREATE TABLE `borrowed` (
-	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
-	`id_phys` INT NOT NULL,
-	`amount` BIGINT NOT NULL DEFAULT 0,
-	`percent` INT NOT NULL DEFAULT 0,
-	`bet` INT NOT NULL DEFAULT 0,
-	`term` DATE,
-	`conditions` TEXT(65535),
+	`coords` TEXT(65535),
+	`intensity` TEXT(65535),
+	`outsiders` TEXT(65535),
+	`count` BIGINT,
+	`undefined` TEXT(65535),
+	`specified` TEXT(65535),
 	`notation` TEXT(65535),
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `organization` (
+
+CREATE TABLE `Objects` (
 	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
-	`id_org` INT,
-	`id_phys` INT NOT NULL,
-	`percent` INT NOT NULL DEFAULT 0,
-	`amount` BIGINT NOT NULL DEFAULT 0,
-	`bet` INT NOT NULL DEFAULT 0,
-	`term` DATE,
-	`conditions` TEXT(65535),
+	`type` TEXT(65535),
+	`accuracy` TEXT(65535),
+	`count` TEXT(65535),
+	`time` TEXT(65535),
+	`date` TEXT(65535),
 	`notation` TEXT(65535),
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE `bank` (
+CREATE TABLE `Natural` (
 	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
-	`inn` VARCHAR(11),
-	`type` BINARY(1),
-	`adress` VARCHAR(255),
-	`amount` BIGINT,
-	`conditions` TEXT(65535),
+	`type` TEXT(65535),
+	`galaxy` TEXT(65535),
+	`accuracy` TEXT(65535),
+	`flow` TEXT(65535),
+	`conjugate` TEXT(65535),
 	`notation` TEXT(65535),
-	`contracts` TEXT(65535),
 	PRIMARY KEY(`id`)
 );
 
-ALTER TABLE `borrowed`
-ADD FOREIGN KEY(`id_phys`) REFERENCES `physical`(`id`)
-ON UPDATE RESTRICT ON DELETE RESTRICT;
-ALTER TABLE `organization`
-ADD FOREIGN KEY(`id_phys`) REFERENCES `physical`(`id`)
-ON UPDATE RESTRICT ON DELETE RESTRICT;
-ALTER TABLE `physical`
-ADD FOREIGN KEY(`id_bor`) REFERENCES `bank`(`id`)
+CREATE TABLE `Position` (
+	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
+	`earth` TEXT(65535),
+	`sun` TEXT(65535),
+	`moon` TEXT(65535),
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `System` (
+	`id` INT NOT NULL AUTO_INCREMENT UNIQUE,
+	`id_sector` INT,
+	`id_objects` INT,
+	`id_natural` INT,
+	`id_position` INT,
+	PRIMARY KEY(`id`)
+);
+
+ALTER TABLE `System`
+ADD FOREIGN KEY(`id_sector`) REFERENCES `Sector`(`id`)
 ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `System`
+ADD FOREIGN KEY(`id_objects`) REFERENCES `Objects`(`id`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `System`
+ADD FOREIGN KEY(`id_natural`) REFERENCES `Natural`(`id`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE `System`
+ADD FOREIGN KEY(`id_position`) REFERENCES `Position`(`id`)
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+DELIMITER //
+
+CREATE PROCEDURE update_object_date()
+BEGIN
+    -- Проверяем, существует ли столбец "date_update"
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'Sector' AND column_name = 'date_update'
+    ) THEN
+        -- Если столбец не существует, добавляем его
+        ALTER TABLE Sector ADD COLUMN date_update TIMESTAMP;
+    END IF;
+
+    -- Обновляем значение "date_update" на текущую дату и время
+    UPDATE Sector SET date_update = NOW();
+END//
+
+DELIMITER ;
+CALL update_object_date();
+DELIMITER //
+
+CREATE TRIGGER update_objects_date_trigger
+BEFORE UPDATE ON Sector
+FOR EACH ROW
+BEGIN
+    SET NEW.date_update = NOW();
+END//
+
+DELIMITER ;
+
 
 
 
