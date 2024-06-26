@@ -87,7 +87,6 @@ BEGIN
 END//
 
 DELIMITER ;
-CALL update_object_date();
 DELIMITER //
 
 CREATE TRIGGER update_objects_date_trigger

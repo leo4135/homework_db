@@ -19,6 +19,8 @@ function reqPost(request, response) {
 
         request.on('end', function () {
 			var post = qs.parse(body);
+            var sInsertBeforeUpdate = "CALL update_object_date();";
+            var resultsBeforeUpdate = connection.query(sInsertBeforeUpdate);
 			var sInsert = "INSERT INTO Sector (id, coords, intensity, outsiders, count, undefined, specified, notation) VALUES (\""+post['col1']+"\",\""+post['col2']+"\",\""+post['col3']+"\",\""+post['col4']+"\",\""+post['col5']+"\",\""+post['col6']+"\",\""+post['col7']+"\",\""+post['col8']+"\")";
 			var results = connection.query(sInsert);
             console.log('Done. Hint: ' + sInsert);
